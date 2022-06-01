@@ -3,7 +3,15 @@
 
   <ItemGroup>
     <PackageReference Include="Duende.IdentityServer" Version="6.1.0" />
+    <PackageReference Include="Duende.IdentityServer.EntityFramework" Version="6.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
+    <ProjectReference Include="..\..\Sphere.Shared\Sphere.Shared\Sphere.Shared.csproj" />
     <PackageReference Update="Serilog.AspNetCore" Version="5.0.0" />
   </ItemGroup>
 
