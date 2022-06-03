@@ -2,7 +2,7 @@ namespace Sphere.Auth.API.Pages.Grants;
 
 public class ViewModel
 {
-    public IEnumerable<GrantViewModel> Grants { get; set; }
+    public IEnumerable<GrantViewModel> Grants { get; set; } = Enumerable.Empty<GrantViewModel>();
 }
 
 public class GrantViewModel
@@ -14,6 +14,6 @@ public class GrantViewModel
     public string Description { get; set; }
     public DateTime Created { get; set; }
     public DateTime? Expires { get; set; }
-    public IEnumerable<string> IdentityGrantNames { get; set; }
-    public IEnumerable<string> ApiGrantNames { get; set; }
+    public IEnumerable<string> IdentityGrantNames { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> ApiGrantNames { get; set; } = Enumerable.Empty<string>();
 }

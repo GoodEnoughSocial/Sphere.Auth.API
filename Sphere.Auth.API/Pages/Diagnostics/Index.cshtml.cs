@@ -9,7 +9,7 @@ namespace Sphere.Auth.API.Pages.Diagnostics;
 [Authorize]
 public class Index : PageModel
 {
-    public ViewModel View { get; set; }
+    public ViewModel? View { get; set; }
         
     public async Task<IActionResult> OnGet()
     {

@@ -13,23 +13,23 @@ namespace Sphere.Auth.API.Pages.Ciba;
 [SecurityHeaders]
 public class IndexModel : PageModel
 {
-    public BackchannelUserLoginRequest LoginRequest { get; set; }
+    public BackchannelUserLoginRequest? LoginRequest { get; set; }
 
-    private readonly IBackchannelAuthenticationInteractionService _backchannelAuthenticationInteraction;
-    private readonly ILogger<IndexModel> _logger;
+    private readonly IBackchannelAuthenticationInteractionService backchannelAuthenticationInteraction;
+    private readonly ILogger<IndexModel> logger;
 
     public IndexModel(IBackchannelAuthenticationInteractionService backchannelAuthenticationInteractionService, ILogger<IndexModel> logger)
     {
-        _backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
-        _logger = logger;
+        backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
+        this.logger = logger;
     }
 
     public async Task<IActionResult> OnGet(string id)
     {
-        LoginRequest = await _backchannelAuthenticationInteraction.GetLoginRequestByInternalIdAsync(id);
-        if (LoginRequest == null)
+        LoginRequest = await backchannelAuthenticationInteraction.GetLoginRequestByInternalIdAsync(id);
+        if (LoginRequest is null)
         {
-            _logger.LogWarning("Invalid backchannel login id {id}", id);
+            logger.LogWarning("Invalid backchannel login id {id}", id);
             return RedirectToPage("/Home/Error/Index");
         }
 

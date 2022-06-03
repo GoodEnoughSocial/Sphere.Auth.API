@@ -1,8 +1,3 @@
-
-// Copyright (c) Duende Software. All rights reserved.
-// See LICENSE in the project root for license information.
-
-
 namespace Sphere.Auth.API.Pages.Logout;
 
 public class LoggedOutViewModel

@@ -3,7 +3,9 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
+
 using IdentityModel;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,7 +13,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace Sphere.Auth.API.Pages.Consent;
 
 [Authorize]
-[SecurityHeadersAttribute]
+[SecurityHeaders]
 public class Index : PageModel
 {
     private readonly IIdentityServerInteractionService _interaction;
@@ -28,10 +30,10 @@ public class Index : PageModel
         _logger = logger;
     }
 
-    public ViewModel View { get; set; }
-        
+    public ViewModel? View { get; set; }
+
     [BindProperty]
-    public InputModel Input { get; set; }
+    public InputModel? Input { get; set; }
 
     public async Task<IActionResult> OnGet(string returnUrl)
     {
@@ -55,7 +57,7 @@ public class Index : PageModel
         var request = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
         if (request == null) return RedirectToPage("/Home/Error/Index");
 
-        ConsentResponse grantedConsent = null;
+        ConsentResponse? grantedConsent = null;
 
         // user clicked 'no' - send back the standard 'access_denied' response
         if (Input?.Button == "no")
@@ -118,7 +120,7 @@ public class Index : PageModel
         return Page();
     }
 
-    private async Task<ViewModel> BuildViewModelAsync(string returnUrl, InputModel model = null)
+    private async Task<ViewModel?> BuildViewModelAsync(string returnUrl, InputModel? model = null)
     {
         var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
         if (request != null)
@@ -127,13 +129,15 @@ public class Index : PageModel
         }
         else
         {
-            _logger.LogError("No consent request matching request: {0}", returnUrl);
+            _logger.LogError("No consent request matching request: {returnUrl}", returnUrl);
         }
+
         return null;
     }
 
     private ViewModel CreateConsentViewModel(
-        InputModel model, string returnUrl,
+        InputModel? model,
+        string returnUrl,
         AuthorizationRequest request)
     {
         var vm = new ViewModel
@@ -141,12 +145,11 @@ public class Index : PageModel
             ClientName = request.Client.ClientName ?? request.Client.ClientId,
             ClientUrl = request.Client.ClientUri,
             ClientLogoUrl = request.Client.LogoUri,
-            AllowRememberConsent = request.Client.AllowRememberConsent
-        };
-
-        vm.IdentityScopes = request.ValidatedResources.Resources.IdentityResources
+            AllowRememberConsent = request.Client.AllowRememberConsent,
+            IdentityScopes = request.ValidatedResources.Resources.IdentityResources
             .Select(x => CreateScopeViewModel(x, model?.ScopesConsented == null || model.ScopesConsented?.Contains(x.Name) == true))
-            .ToArray();
+            .ToArray()
+        };
 
         var resourceIndicators = request.Parameters.GetValues(OidcConstants.AuthorizeRequest.Resource) ?? Enumerable.Empty<string>();
         var apiResources = request.ValidatedResources.Resources.ApiResources.Where(x => resourceIndicators.Contains(x.Name));
@@ -171,12 +174,13 @@ public class Index : PageModel
         {
             apiScopes.Add(GetOfflineAccessScope(model == null || model.ScopesConsented?.Contains(Duende.IdentityServer.IdentityServerConstants.StandardScopes.OfflineAccess) == true));
         }
+
         vm.ApiScopes = apiScopes;
 
         return vm;
     }
 
-    private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+    private static ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
     {
         return new ScopeViewModel
         {
@@ -193,7 +197,7 @@ public class Index : PageModel
     public ScopeViewModel CreateScopeViewModel(ParsedScopeValue parsedScopeValue, ApiScope apiScope, bool check)
     {
         var displayName = apiScope.DisplayName ?? apiScope.Name;
-        if (!String.IsNullOrWhiteSpace(parsedScopeValue.ParsedParameter))
+        if (!string.IsNullOrWhiteSpace(parsedScopeValue.ParsedParameter))
         {
             displayName += ":" + parsedScopeValue.ParsedParameter;
         }
@@ -210,7 +214,7 @@ public class Index : PageModel
         };
     }
 
-    private ScopeViewModel GetOfflineAccessScope(bool check)
+    private static ScopeViewModel GetOfflineAccessScope(bool check)
     {
         return new ScopeViewModel
         {

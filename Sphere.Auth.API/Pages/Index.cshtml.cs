@@ -7,7 +7,7 @@ namespace Sphere.Auth.API.Pages.Home;
 [AllowAnonymous]
 public class Index : PageModel
 {
-    public string Version;
+    public string? Version;
         
     public void OnGet()
     {

@@ -1,6 +1,3 @@
-// Copyright (c) Duende Software. All rights reserved.
-// See LICENSE in the project root for license information.
-
 using System.ComponentModel.DataAnnotations;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -14,22 +11,23 @@ namespace Sphere.Auth.API.Pages.Ciba;
 [Authorize]
 public class AllModel : PageModel
 {
-    public IEnumerable<BackchannelUserLoginRequest> Logins { get; set; }
+    public IEnumerable<BackchannelUserLoginRequest> Logins { get; set; } = Enumerable.Empty<BackchannelUserLoginRequest>();
 
-    [BindProperty, Required]
-    public string Id { get; set; }
-    [BindProperty, Required]
-    public string Button { get; set; }
+    [BindProperty, Required(AllowEmptyStrings = false)]
+    public string Id { get; set; } = string.Empty;
 
-    private readonly IBackchannelAuthenticationInteractionService _backchannelAuthenticationInteraction;
+    [BindProperty, Required(AllowEmptyStrings = false)]
+    public string Button { get; set; } = string.Empty;
+
+    private readonly IBackchannelAuthenticationInteractionService backchannelAuthenticationInteraction;
 
     public AllModel(IBackchannelAuthenticationInteractionService backchannelAuthenticationInteractionService)
     {
-        _backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
+        backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
     }
 
     public async Task OnGet()
     {
-        Logins = await _backchannelAuthenticationInteraction.GetPendingLoginRequestsForCurrentUserAsync();
+        Logins = await backchannelAuthenticationInteraction.GetPendingLoginRequestsForCurrentUserAsync();
     }
 }

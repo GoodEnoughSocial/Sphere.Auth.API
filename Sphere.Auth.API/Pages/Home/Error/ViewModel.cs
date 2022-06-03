@@ -1,7 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
-// See LICENSE in the project root for license information.
-
-using Duende.IdentityServer.Models;
+﻿using Duende.IdentityServer.Models;
 
 namespace Sphere.Auth.API.Pages.Error;
 
@@ -16,5 +13,5 @@ public class ViewModel
         Error = new ErrorMessage { Error = error };
     }
 
-    public ErrorMessage Error { get; set; }
+    public ErrorMessage? Error { get; set; }
 }

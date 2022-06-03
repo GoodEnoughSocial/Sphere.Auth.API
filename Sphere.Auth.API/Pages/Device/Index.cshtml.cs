@@ -16,10 +16,10 @@ namespace Sphere.Auth.API.Pages.Device;
 [Authorize]
 public class Index : PageModel
 {
-    private readonly IDeviceFlowInteractionService _interaction;
-    private readonly IEventService _events;
-    private readonly IOptions<IdentityServerOptions> _options;
-    private readonly ILogger<Index> _logger;
+    private readonly IDeviceFlowInteractionService interaction;
+    private readonly IEventService events;
+    private readonly IOptions<IdentityServerOptions> options;
+    private readonly ILogger<Index> logger;
 
     public Index(
         IDeviceFlowInteractionService interaction,
@@ -27,16 +27,16 @@ public class Index : PageModel
         IOptions<IdentityServerOptions> options,
         ILogger<Index> logger)
     {
-        _interaction = interaction;
-        _events = eventService;
-        _options = options;
-        _logger = logger;
+        this.interaction = interaction;
+        this.events = eventService;
+        this.options = options;
+        this.logger = logger;
     }
 
-    public ViewModel View { get; set; }
+    public ViewModel? View { get; set; }
 
     [BindProperty]
-    public InputModel Input { get; set; }
+    public InputModel? Input { get; set; }
 
     public async Task<IActionResult> OnGet(string userCode)
     {
@@ -56,7 +56,8 @@ public class Index : PageModel
             return Page();
         }
 
-        Input = new InputModel { 
+        Input = new InputModel
+        {
             UserCode = userCode,
         };
 
@@ -65,7 +66,7 @@ public class Index : PageModel
 
     public async Task<IActionResult> OnPost()
     {
-        var request = await _interaction.GetAuthorizationContextAsync(Input.UserCode);
+        var request = await interaction.GetAuthorizationContextAsync(Input.UserCode);
         if (request == null) return RedirectToPage("/Home/Error/Index");
 
         ConsentResponse grantedConsent = null;
@@ -79,7 +80,7 @@ public class Index : PageModel
             };
 
             // emit event
-            await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
+            await events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
         }
         // user clicked 'yes' - validate the data
         else if (Input.Button == "yes")
@@ -101,7 +102,7 @@ public class Index : PageModel
                 };
 
                 // emit event
-                await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, grantedConsent.ScopesValuesConsented, grantedConsent.RememberConsent));
+                await events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, grantedConsent.ScopesValuesConsented, grantedConsent.RememberConsent));
             }
             else
             {
@@ -116,7 +117,7 @@ public class Index : PageModel
         if (grantedConsent != null)
         {
             // communicate outcome of consent back to identityserver
-            await _interaction.HandleRequestAsync(Input.UserCode, grantedConsent);
+            await interaction.HandleRequestAsync(Input.UserCode, grantedConsent);
 
             // indicate that's it ok to redirect back to authorization endpoint
             return RedirectToPage("/Device/Success");
@@ -128,9 +129,9 @@ public class Index : PageModel
     }
 
 
-    private async Task<ViewModel> BuildViewModelAsync(string userCode, InputModel model = null)
+    private async Task<ViewModel?> BuildViewModelAsync(string userCode, InputModel? model = null)
     {
-        var request = await _interaction.GetAuthorizationContextAsync(userCode);
+        var request = await interaction.GetAuthorizationContextAsync(userCode);
         if (request != null)
         {
             return CreateConsentViewModel(model, request);
@@ -139,38 +140,39 @@ public class Index : PageModel
         return null;
     }
 
-    private ViewModel CreateConsentViewModel(InputModel model, DeviceFlowAuthorizationRequest request)
+    private ViewModel CreateConsentViewModel(InputModel? model, DeviceFlowAuthorizationRequest request)
     {
         var vm = new ViewModel
         {
             ClientName = request.Client.ClientName ?? request.Client.ClientId,
             ClientUrl = request.Client.ClientUri,
             ClientLogoUrl = request.Client.LogoUri,
-            AllowRememberConsent = request.Client.AllowRememberConsent
+            AllowRememberConsent = request.Client.AllowRememberConsent,
+            IdentityScopes = request.ValidatedResources.Resources.IdentityResources.Select(x => CreateScopeViewModel(x, model == null || model.ScopesConsented?.Contains(x.Name) == true)).ToArray()
         };
-
-        vm.IdentityScopes = request.ValidatedResources.Resources.IdentityResources.Select(x => CreateScopeViewModel(x, model == null || model.ScopesConsented?.Contains(x.Name) == true)).ToArray();
 
         var apiScopes = new List<ScopeViewModel>();
         foreach (var parsedScope in request.ValidatedResources.ParsedScopes)
         {
             var apiScope = request.ValidatedResources.Resources.FindApiScope(parsedScope.ParsedName);
-            if (apiScope != null)
+            if (apiScope is not null)
             {
                 var scopeVm = CreateScopeViewModel(parsedScope, apiScope, model == null || model.ScopesConsented?.Contains(parsedScope.RawValue) == true);
                 apiScopes.Add(scopeVm);
             }
         }
+
         if (DeviceOptions.EnableOfflineAccess && request.ValidatedResources.Resources.OfflineAccess)
         {
             apiScopes.Add(GetOfflineAccessScope(model == null || model.ScopesConsented?.Contains(Duende.IdentityServer.IdentityServerConstants.StandardScopes.OfflineAccess) == true));
         }
+
         vm.ApiScopes = apiScopes;
 
         return vm;
     }
 
-    private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+    private static ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
     {
         return new ScopeViewModel
         {
@@ -197,7 +199,7 @@ public class Index : PageModel
         };
     }
 
-    private ScopeViewModel GetOfflineAccessScope(bool check)
+    private static ScopeViewModel GetOfflineAccessScope(bool check)
     {
         return new ScopeViewModel
         {
