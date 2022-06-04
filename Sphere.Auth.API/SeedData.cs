@@ -3,7 +3,6 @@ using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-
 using Sphere.Auth.API.Data;
 using Sphere.Auth.API.Models;
 
@@ -14,7 +13,7 @@ public class SeedData
     public static void EnsureSeedData(WebApplication app)
     {
         using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
-        
+
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
 
@@ -28,6 +27,7 @@ public class SeedData
                 Email = "AliceSmith@email.com",
                 EmailConfirmed = true,
             };
+
             var result = userMgr.CreateAsync(alice, "Pass123$").Result;
             if (!result.Succeeded)
             {
@@ -60,6 +60,7 @@ public class SeedData
                 Email = "BobSmith@email.com",
                 EmailConfirmed = true
             };
+
             var result = userMgr.CreateAsync(bob, "Pass123$").Result;
             if (!result.Succeeded)
             {
@@ -77,6 +78,7 @@ public class SeedData
             {
                 throw new Exception(result.Errors.First().Description);
             }
+
             Log.Debug("bob created");
         }
         else
