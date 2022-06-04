@@ -20,6 +20,7 @@ try
     var result = await Services.RegisterService(registration);
 
     var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddHealthChecks();
 
     builder.Host.UseSerilog(SphericalLogger.ConfigureLogger);
 
@@ -65,6 +66,7 @@ try
     builder.Services.AddSwaggerGen();
 
     var app = builder.Build();
+    app.MapHealthChecks("/health");
 
     if (args.Contains("/seed"))
     {
