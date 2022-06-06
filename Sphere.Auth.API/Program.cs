@@ -8,7 +8,6 @@ using Sphere.Auth.API.Data;
 using Sphere.Auth.API.Models;
 using Sphere.Shared;
 
-
 Log.Logger = SphericalLogger.SetupLogger();
 
 Log.Information("Starting up");
