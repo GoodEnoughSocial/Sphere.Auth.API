@@ -17,6 +17,7 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     builder.Host.UseSerilog(SphericalLogger.SetupLogger);
+    builder.Services.AddInjectableOrleansClient();
     builder.Services.AddHealthChecks();
 
     builder.Services.AddRazorPages();
@@ -107,7 +108,6 @@ finally
     Log.Information("Shutting down");
     Log.CloseAndFlush();
 }
-
 
 static void InitializeDatabase(IApplicationBuilder app)
 {
