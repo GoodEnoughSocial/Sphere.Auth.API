@@ -8,20 +8,16 @@ using Sphere.Auth.API.Data;
 using Sphere.Auth.API.Models;
 using Sphere.Shared;
 
-Log.Logger = SphericalLogger.SetupLogger();
+// Setting this allows us to get some benefits all over the place.
+Services.Current = Services.Auth;
 
-Log.Information("Starting up");
-
-var registration = Services.Auth.GetServiceRegistration();
+Log.Logger = SphericalLogger.StartupLogger(Services.Current);
 
 try
 {
-    var result = await Services.RegisterService(registration);
-
     var builder = WebApplication.CreateBuilder(args);
+    builder.Host.UseSerilog(SphericalLogger.SetupLogger);
     builder.Services.AddHealthChecks();
-
-    builder.Host.UseSerilog(SphericalLogger.ConfigureLogger);
 
     builder.Services.AddRazorPages();
 
@@ -65,7 +61,7 @@ try
     builder.Services.AddSwaggerGen();
 
     var app = builder.Build();
-    app.MapHealthChecks("/health");
+    app.MapHealthChecks(Constants.HealthCheckEndpoint);
 
     if (args.Contains("/seed"))
     {
@@ -95,6 +91,7 @@ try
     app.UseAuthorization();
 
     app.MapRazorPages().RequireAuthorization();
+    app.MapControllers();
 
     app.Run();
 }
@@ -107,8 +104,6 @@ catch (Exception ex)
 }
 finally
 {
-    await Services.UnregisterService(registration);
-
     Log.Information("Shutting down");
     Log.CloseAndFlush();
 }

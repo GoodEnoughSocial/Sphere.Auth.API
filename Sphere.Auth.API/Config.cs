@@ -56,12 +56,12 @@ public static class Config
                 },
                 AllowedGrantTypes = GrantTypes.Code,
                 // where to redirect to after login
-                RedirectUris = { Services.SphereWebTestApp.Combine("signin-oidc") },
+                // RedirectUris = { Services.SphereWebTestApp.Combine("signin-oidc") },
 
                 AllowOfflineAccess = true,
 
                 // where to redirect to after logout
-                PostLogoutRedirectUris = { Services.SphereWebTestApp.Combine("signout-callback-oidc") },
+                // PostLogoutRedirectUris = { Services.SphereWebTestApp.Combine("signout-callback-oidc") },
 
                 AllowedScopes = new List<string>
                 {
